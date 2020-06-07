@@ -15,8 +15,8 @@ ConfigManager::ConfigManager(string path)
   
   string line;
   while (getline(infile, line)){
-    if(line.find("#") == 0) continue;
-    if(line.find("*") == 0) continue;
+    if(line.find("#") != string::npos) continue;
+    if(line.find("*") != string::npos) continue;
     
     if(line.find_first_not_of(' ') == string::npos) continue;
     
@@ -25,7 +25,7 @@ ConfigManager::ConfigManager(string path)
     
     getline(lineStream, key, ':');
     getline(lineStream, value);
-    
+
     key.erase(std::remove_if(key.begin(), key.end(), ::isspace), key.end());
     value.erase(std::remove_if(value.begin(), value.end(), ::isspace), value.end());
     

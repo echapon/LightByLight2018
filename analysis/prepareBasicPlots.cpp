@@ -141,6 +141,9 @@ vector<tuple<string, int, double, double>> histParams = {
   {"nPixelClusters"         , 2000, 0   , 2000  },
   {"nPixelRecHits"          , 2000, 0   , 2000  },
   
+  {"zdc_sum_energy_pos"     , 20000, 0   , 1000000 },
+  {"zdc_sum_energy_neg"     , 20000, 0   , 1000000 },
+  
 };
 
 void fillTriphotonHists(Event &event, const map<string, TH1D*> &hists, string datasetName, bool saveEventDisplays=false)
@@ -224,6 +227,23 @@ void fillPhotonHists(Event &event, const map<string, TH1D*> &hists, string datas
     hists.at("lbl_bad_photon_eta_"+suffix+datasetName)->Fill(photon->GetEta());
     hists.at("lbl_bad_photon_phi_"+suffix+datasetName)->Fill(photon->GetPhi());
   }
+}
+
+void fillZDCHists(Event &event, const map<string, TH1D*> &hists, string datasetName, string suffix="")
+{
+  if(suffix != "") suffix += "_";
+  
+  double zdcEnergySumPos = 0;
+  double zdcEnergySumNeg = 0;
+  
+  for(auto zdc : event.GetPhysObjects(kZDC)){
+    if(zdc->GetZside() > 0) zdcEnergySumPos += zdc->GetEnergy();
+    else                    zdcEnergySumNeg += zdc->GetEnergy();
+  }
+  
+  hists.at("zdc_sum_energy_pos_"+suffix+datasetName)->Fill(zdcEnergySumPos);
+  hists.at("zdc_sum_energy_neg_"+suffix+datasetName)->Fill(zdcEnergySumNeg);
+  
 }
 
 void fillDiphotonHists(Event &event, const map<string, TH1D*> &hists, string datasetName, string suffix="")
@@ -413,13 +433,20 @@ void fillLbLHistograms(Event &event, const map<string, TH1D*> &hists, EDataset d
   if(event.GetNpixelRecHits() > config.params("maxNpixelRecHits")) return;
   hists.at("lbl_cut_flow_all_"+name)->Fill(cutThrough++); // 4
   
-  double zdcEnergySum = 0;
+   double zdcEnergySum = 0;
+   double zdcEnergySumPos = 0;
+   double zdcEnergySumNeg = 0;
+   
+   for(auto zdc : event.GetPhysObjects(kZDC)){
+     zdcEnergySum += zdc->GetEnergy();
+     
+     if(zdc->GetZside() > 0) zdcEnergySumPos += zdc->GetEnergy();
+     else                    zdcEnergySumNeg += zdc->GetEnergy();
+   }
   
-  for(auto zdc : event.GetPhysObjects(kZDC)){
-    if(zdc->GetEnergy() > config.params("maxZDCenergy")) return;
-    zdcEnergySum += zdc->GetEnergy();
-  }
   if(zdcEnergySum > config.params("maxTotalZDCenergy")) return;
+  if(zdcEnergySumPos > config.params("maxTotalZDCenergyPerSide") &&
+     zdcEnergySumNeg > config.params("maxTotalZDCenergyPerSide")) return;
   
   hists.at("lbl_cut_flow_all_"+name)->Fill(cutThrough++); // 5
   
@@ -613,6 +640,7 @@ int main(int argc, char* argv[])
         fillLbLHistograms(*event, hists, dataset);
         fillCHEhistograms(*event, hists, dataset);
         fillQEDHistograms(*event, hists, dataset);
+        fillZDCHists(*event, hists, datasetName.at(dataset), "all");
       }
       
       outFile->cd();
@@ -657,6 +685,7 @@ int main(int argc, char* argv[])
       fillLbLHistograms(*event, hists, dataset);
       fillCHEhistograms(*event, hists, dataset);
       fillQEDHistograms(*event, hists, dataset);
+      fillZDCHists(*event, hists, sampleName, "all");
     }
     
     outFile->cd();

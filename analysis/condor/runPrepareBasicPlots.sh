@@ -1,87 +1,41 @@
 #!/bin/bash
 
-echo "Starting runPrepareBasicPlots"
-
 # ./runPrepareBasicPlots.sh fileNumber sampleType configType
+
+echo "Starting runPrepareBasicPlots"
 
 configPath=""
 suffix=""
+inputPath=""
+outputPath=""
+sampleName=""
+basePath="/eos/cms/store/group/phys_diffraction/lbyl_2018"
+
+##
+# Select config file
+##
 
 if [ $3 -eq 0 ]
 then
 # default
   configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_default.md"
-  suffix="_default_noZDCcuts"
+  suffix="_default_full"
 elif [ $3 -eq 1 ]
 then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_noPixelTracks.md"
-  suffix="_noPixelTracks"
-elif [ $3 -eq 2 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_ZDCcut.md"
-  suffix="_ZDCcut_200"
-elif [ $3 -eq 3 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_totalZDCcut.md"
-  suffix="_totalZDCcut"
-elif [ $3 -eq 4 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_newCuts.md"
-  suffix="_newCuts"
-elif [ $3 -eq 5 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_looserCHE.md"
-  suffix="_looserCHE_noZDCcuts"
-elif [ $3 -eq 6 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_noCHE.md"
-  suffix="_noCHE_noZDCcuts"
-elif [ $3 -eq 7 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_looserPixelTracks.md"
-  suffix="_looserPixelTracks_noZDCcuts"
-elif [ $3 -eq 8 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_noPixelTracks.md"
-  suffix="_noPixelTracks_noZDCcuts"
-elif [ $3 -eq 9 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_looserZDC.md"
-  suffix="_looserZDC"
-elif [ $3 -eq 10 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_noZDC.md"
-  suffix="_noZDC"
-elif [ $3 -eq 11 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_looserNEE.md"
-  suffix="_looserNEE_noZDCcuts"
-elif [ $3 -eq 12 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_noNEE.md"
-  suffix="_noNEE_noZDCcuts"
-elif [ $3 -eq 13 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_looserPhotonID.md"
-  suffix="_looserPhotonID_noZDCcuts"
-elif [ $3 -eq 14 ]
-then
-  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_noPhotonID.md"
-  suffix="_noPhotonID_noZDCcuts"
+  configPath="/afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/configs/preparePlots_looserHINPhotonHESigma.md"
+  suffix="_looserHINPhotonHESigma"
 fi
 
-# for the data:
-inputPath=""
-outputPath=""
-sampleName=""
-
-basePath="/eos/cms/store/group/phys_diffraction/lbyl_2018"
+##
+# Select sample type
+##
 
 if [ $2 -eq 0 ]
 then
   sampleName="Data" # last chunk number: 7440, merged into 60 files
 #  inputPath=`sed "${1}q;d" /afs/cern.ch/work/j/jniedzie/private/LightByLight2018/analysis/input_list.txt`
-    inputPath="${basePath}/skimmed_ntuples/data_doubleEG2_complete/merged/merged_ntuples_${1}.root"
+#  inputPath="${basePath}/skimmed_ntuples/data_doubleEG2_complete/merged/merged_ntuples_${1}.root"
+  inputPath="${basePath}/skimmed_ntuples/data_doubleEG2_complete_full/merged/merged_ntuples_${1}.root"
   outputPath="${basePath}/analysis/basicPlots/basicPlots_data${suffix}"
   
 elif [ $2 -eq 1 ]
@@ -111,6 +65,8 @@ then
 #  inputPath="${basePath}/mc_qed/ntuples_superchic_1034/ntuples_sc_1034/ntuples_sc_1034/191113_105005/0000/HiForestAOD_LbyL_full_sample_lbyl_reco_${1}.root"
   outputPath="${basePath}/analysis/basicPlots/basicPlots_mc_qed_sl${suffix}"
 fi
+
+
 
 mkdir -p $outputPath
 
